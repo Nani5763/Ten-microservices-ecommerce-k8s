@@ -22,7 +22,7 @@ pipeline {
         stage("Docker Image Build") {
             steps {
                 script {
-                    dir('src/frontend') {
+                    dir('src/shippingservice') {
                         sh 'docker system prune -f'
                         sh 'docker container prune -f'
                         sh 'docker build -t ${AWS_ECR_REPO_NAME} .'
@@ -41,5 +41,3 @@ pipeline {
         }
     }
 }
-
-
