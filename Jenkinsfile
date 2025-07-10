@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         AWS_ACCOUNT_ID      = '656154105519'
-        AWS_ECR_REPO_NAME   = 'productcatalogservice'
+        AWS_ECR_REPO_NAME   = 'recommendationservice'
         AWS_DEFAULT_REGION  = 'us-east-1'
         REPOSITORY_URI      = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
     }
@@ -23,7 +23,7 @@ pipeline {
 
         stage('Docker Image Build') {
             steps {
-                dir('src/productcatalogservice') {
+                dir('src/recommendationservice') {
                     sh 'docker system prune -f'
                     sh 'docker container prune -f'
                     sh 'docker build -t ${AWS_ECR_REPO_NAME} .'
