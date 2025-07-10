@@ -17,7 +17,7 @@ pipeline {
 
         stage('Checkout from Git') {
             steps {
-                git url: 'https://github.com/Nani5763/Ten-microservices-ecommerce-k8s.git'
+                git branch: 'main', url: 'https://github.com/Nani5763/Ten-microservices-ecommerce-k8s.git'
             }
         }
 
