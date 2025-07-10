@@ -1,37 +1,19 @@
 pipeline {
-    agent any 
-
-    environment  {
-        AWS_ACCOUNT_ID = credentials('ACCOUNT_ID')
-        AWS_ECR_REPO_NAME = "adservice"
-        AWS_DEFAULT_REGION = 'us-east-1'
-        REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/"
-    }
+    agent any
 
     stages {
-        stage('Cleaning Workspace') {
+        stage('Deploy To Kubernetes') {
             steps {
-                cleanWs()
-            }
-        }
-        stage('Checkout from Git') {
-            steps {
-                git branch: 'main', url: 'https://github.com/Nani5763/Ten-microservices-ecommerce-k8s.git'
-            }
-        }
-        stage("Docker Image Build") {
-            steps {
-                script {
-                    dir('src/adservice') {
-                        sh 'docker system prune -f'
-                        sh 'docker container prune -f'
-                        sh 'docker build -t ${AWS_ECR_REPO_NAME} .'
-                    }
+                withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'EKS-1', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', serverUrl: 'https://61C7F90CD46535FDF071ABB5EA9E3EC5.gr7.us-east-1.eks.amazonaws.com']]) {
+                    sh "kubectl apply -f deployment-service.yml"
+                    
                 }
             }
         }
-        stage("ECR Image Pushing") {
+        
+        stage('verify Deployment') {
             steps {
+<<<<<<< HEAD
                steps {
                 sh '''
                     aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}
@@ -39,8 +21,12 @@ pipeline {
                     docker push ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}
                 '''
                }
+=======
+                withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'EKS-1', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', serverUrl: 'https://61C7F90CD46535FDF071ABB5EA9E3EC5.gr7.us-east-1.eks.amazonaws.com']]) {
+                    sh "kubectl get svc -n webapps"
+                }
+>>>>>>> main
             }
         }
     }
-} 
-
+}
