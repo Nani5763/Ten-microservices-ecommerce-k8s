@@ -1,11 +1,9 @@
 pipeline {
-    agent any 
+    agent any
 
-    environment  {
-        AWS_ACCOUNT_ID = credentials('ACCOUNT_ID')
+    environment {
         AWS_ECR_REPO_NAME = "adservice"
         AWS_DEFAULT_REGION = 'us-east-1'
-        REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/"
     }
 
     stages {
@@ -35,14 +33,17 @@ pipeline {
 
         stage("ECR Image Pushing") {
             steps {
-                sh """
-                    aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}
-                    docker tag ${AWS_ECR_REPO_NAME} ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}
-                    docker push ${REPOSITORY_URI}${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}
-                """
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                    script {
+                        def repositoryUri = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+                        sh """
+                            aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${repositoryUri}
+                            docker tag ${AWS_ECR_REPO_NAME} ${repositoryUri}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}
+                            docker push ${repositoryUri}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}
+                        """
+                    }
+                }
             }
         }
     }
 }
-
-
