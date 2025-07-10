@@ -26,7 +26,7 @@ pipeline {
                 dir('src/currencyservice') {
                     sh 'docker system prune -f'
                     sh 'docker container prune -f'
-                    sh 'docker build -t ${AWS_ECR_REPO_NAME} .'
+                    sh 'docker build -f src/Dockerfile -t ${AWS_ECR_REPO_NAME} .'
                 }
             }
         }
